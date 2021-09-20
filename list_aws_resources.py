@@ -89,30 +89,40 @@ class AWS_UTIL:
         return dataset
 
     
-    '''------LAMBDA RESOURCES------'''
+    '''## LAMBDA RESOURCES'''
     def list_lambda_resources(self):
         pp = pprint.PrettyPrinter()
+        _found_count = 0
         for region in self.available_regions:
             self.set_region(region)
-            print(f"Resources in {region}".ljust(AWS_UTIL.columns, "-"))
             _functions = self.list_functions()
-            print(">>>>Functions")
-            pp.pprint(_functions)
-            print(">>>>Aliases")
-            pp.pprint(self.list_aliases(_functions))
-            print(">>>>Event Source Mappings")
-            pp.pprint(self.list_event_source_mappings())
-            print(">>>>Function Event Invoke Configs")
-            pp.pprint(self.list_function_event_invoke_configs(_functions))
-            print(">>>>Versions")
-            pp.pprint(self.list_versions_by_function(_functions))
-            print(">>>>Layers")
+            _aliases = self.list_aliases(_functions)
+            _source_mappings = self.list_event_source_mappings()
+            _invoke_configs = self.list_function_event_invoke_configs(_functions)
+            _versions = self.list_versions_by_function(_functions)
             _layers = self.list_layers()
+            _layer_versions = self.list_layer_versions(_layers)
+            _provisioned_concurrency_configs = self.list_provisioned_concurrency_configs(_functions)
+            _found_count = _found_count + len(_functions) + len(_aliases) + len(_source_mappings) + len(_invoke_configs)
+            + len(_versions) + len(_layers) + len(_layer_versions) + len(_provisioned_concurrency_configs)
+            print(f"## Resources in {region}")
+            print("### Functions")
+            pp.pprint(_functions)
+            print("### Aliases")
+            pp.pprint(_aliases)
+            print("### Event Source Mappings")
+            pp.pprint(_source_mappings)
+            print("### Function Event Invoke Configs")
+            pp.pprint(_invoke_configs)
+            print("### Versions")
+            pp.pprint(_versions)
+            print("### Layers")
             pp.pprint(_layers)
-            print(">>>>Layer Versions")
-            pp.pprint(self.list_layer_versions(_layers))
-            print(">>>>Provisioned Concurrency Configs")
-            pp.pprint(self.list_provisioned_concurrency_configs(_functions))
+            print("### Layer Versions")
+            pp.pprint(_layer_versions)
+            print("### Provisioned Concurrency Configs")
+            pp.pprint(_provisioned_concurrency_configs)
+        print (f"## {_found_count} Resources Found Across All Regions")
 
 
     def list_aliases(self, functions):
@@ -176,23 +186,31 @@ class AWS_UTIL:
         return _provisioned_concurrency_configs
 
 
-    '''-----FARGATE/ECS RESOURCES------'''
+    '''## FARGATE/ECS RESOURCES'''
     def list_fargate_resources(self):
         pp = pprint.PrettyPrinter()
+        _found_count = 0
         for region in self.available_regions:
             self.set_region(region)
-            print(f"Resources in {region}".ljust(AWS_UTIL.columns, "-"))
             _clusters = self.list_clusters()
-            print(">>>>Clusters")
+            _attributes = self.list_attributes(_clusters)
+            _container_instances = self.list_container_instances(_clusters)
+            _services = self.list_services(_clusters)
+            _tasks = self.list_tasks(_clusters)
+            _found_count = _found_count + len(_clusters) + len(_attributes) + len(_container_instances)
+            + len(_services) + len(_tasks)
+            print(f"## Resources in {region}")
+            print("### Clusters")
             pp.pprint(_clusters)
-            print(">>>>Attributes")
-            pp.pprint(self.list_attributes(_clusters))
-            print(">>>>Container Instances")
-            pp.pprint(self.list_container_instances(_clusters))
-            print(">>>>Services")
-            pp.pprint(self.list_services(_clusters))
-            print(">>>>Tasks")
-            pp.pprint(self.list_tasks(_clusters))
+            print("### Attributes")
+            pp.pprint(_attributes)
+            print("### Container Instances")
+            pp.pprint(_container_instances)
+            print("### Services")
+            pp.pprint(_services)
+            print("### Tasks")
+            pp.pprint(_tasks)
+        print (f"## {_found_count} Resources Found Across All Regions")
 
 
     def list_attributes(self, clusters):
@@ -254,7 +272,7 @@ if __name__ == "__main__":
     aws_secret_access_key = os.getenv('AWS_SECRET_ACCESS_KEY')
 
     util = AWS_UTIL(aws_access_key=aws_access_key, aws_secret_access_key=aws_secret_access_key)
-    print(f"LAMBDA RESOURCES".ljust(AWS_UTIL.columns, "<"))
+    print(f"# LAMBDA RESOURCES")
     util.list_lambda_resources()
-    print(f"FARGATE/ECS RESOURCES".ljust(AWS_UTIL.columns, "<"))
+    print(f"# FARGATE/ECS RESOURCES")
     util.list_fargate_resources()
